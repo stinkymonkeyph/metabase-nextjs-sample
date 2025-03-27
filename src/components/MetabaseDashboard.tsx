@@ -30,31 +30,6 @@ const MetabaseDashboard = ({
         setLoading(true);
         
         if (createCard) {
-          const defaultCardPayload = {
-            name: "Orders by Category Stacked by Price Range",
-            dataset_query: {
-              database: 1,
-              type: "native",
-              native: {
-                query: "SELECT p.category AS category, CASE WHEN p.price < 20 THEN 'Under $20' WHEN p.price < 50 THEN '$20-$49' WHEN p.price < 100 THEN '$50-$99' ELSE '$100+' END AS price_range, COUNT(*) AS count FROM orders o JOIN products p ON o.product_id = p.id GROUP BY p.category, price_range ORDER BY p.category, price_range",
-                "template-tags": {}
-              }
-            },
-            display: "bar",
-            visualization_settings: {
-              //"graph.dimensions": ["category", "price_range"],
-              //"graph.metrics": ["count"],
-              //"graph.x_axis.title_text": "Product Category",
-              //"graph.y_axis.title_text": "Number of Orders",
-              //"stackable.stack_type": "stacked",
-              //"graph.colors": ["#509EE3", "#88BF4D", "#A989C5", "#EF8C8C"]
-            },
-            description: "SQL-based stacked bar chart showing orders by category and price range",
-            parameters: [],
-            collection_position: null,
-            result_metadata: null
-          };
-          
           const cardResponse = await fetch('/api/metabase-card', {
             method: 'POST',
             headers: {
@@ -62,7 +37,7 @@ const MetabaseDashboard = ({
             },
             body: JSON.stringify({
               dashboardId: dashboardId,
-              cardPayload: cardPayload || defaultCardPayload,
+              cardPayload: cardPayload,
               cardWidth: cardWidth,
               cardHeight: cardHeight
             }),
