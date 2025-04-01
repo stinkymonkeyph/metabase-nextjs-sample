@@ -1,8 +1,29 @@
 'use client';
 import MetabaseCard from '@/components/MetabaseCard';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function DashboardPage() {
+  const [createdCardId, setCreatedCardId] = useState<number | null>(null);
+  const [windowHeight, setWindowHeight] = useState<number>(800);
+  
+  // Calculate available height for the card
+  useEffect(() => {
+    const calculateHeight = () => {
+      // Subtract header height and padding to get the available space
+      const headerHeight = 100; // Approximate height of your header
+      const padding = 32; // Total vertical padding (16px top + 16px bottom)
+      const availableHeight = window.innerHeight - headerHeight - padding;
+      setWindowHeight(availableHeight > 400 ? availableHeight : 400);
+    };
+    
+    // Calculate on mount
+    calculateHeight();
+    
+    // Recalculate on window resize
+    window.addEventListener('resize', calculateHeight);
+    return () => window.removeEventListener('resize', calculateHeight);
+  }, []);
+  
   // Example of a card payload you might want to use
   const [customCardPayload, setCustomCardPayload] = useState({
     name: "Orders by Category Stacked by Price Range",
@@ -24,14 +45,8 @@ export default function DashboardPage() {
       "graph.colors": ["#509EE3", "#88BF4D", "#A989C5", "#EF8C8C"]
     },
     description: "SQL-based stacked bar chart showing orders by category and price range",
-    parameters: [],
-    collection_position: null,
-    result_metadata: null,
-    enable_embedding: true  // Request embedding to be enabled
+    enable_embedding: true
   });
-  
-  // Adding a state to track newly created card ID
-  const [createdCardId, setCreatedCardId] = useState<number | null>(null);
   
   const createCard = async () => {
     try {
@@ -61,47 +76,47 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen">
-      {/* Header */}
+    <div className="flex flex-col h-screen w-screen overflow-hidden">
+      {/* Minimal header */}
       <header className="bg-white shadow-sm p-4">
-        <h1 className="text-xl font-semibold text-black">Analytics Cards</h1>
-        {!createdCardId && (
-          <button 
-            onClick={createCard}
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Create New Card
-          </button>
-        )}
-        {createdCardId && (
-          <div className="mt-2 px-4 py-2 bg-green-100 border border-green-300 rounded">
-            <p className="text-green-800 font-medium">
-              Created Card ID: <span className="font-mono font-bold">{createdCardId}</span>
-            </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-semibold text-black">Analytics Cards</h1>
+            {createdCardId && (
+              <p className="text-gray-800 font-medium">
+                Created Card ID: <span className="font-mono">{createdCardId}</span>
+              </p>
+            )}
           </div>
-        )}
-      </header>
-      
-      {/* Main content area */}
-      <main className="flex-grow w-full p-4">
-        <div className="grid grid-cols-1 gap-6">
-          {createdCardId ? (
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Embedded Card (ID: {createdCardId})</h2>
-              <MetabaseCard 
-                cardId={createdCardId}
-                height={400}
-                params={{
-                  // Optional parameters to filter the visualization
-                }}
-              />
-            </div>
-          ) : (
-            <div className="bg-gray-100 rounded-lg shadow-md p-4 text-center">
-              <p>Click "Create New Card" to generate and view a Metabase card</p>
-            </div>
+          {!createdCardId && (
+            <button 
+              onClick={createCard}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Create New Card
+            </button>
           )}
         </div>
+      </header>
+      
+      {/* Main content - takes all available space */}
+      <main className="flex-grow w-full overflow-hidden">
+        {createdCardId ? (
+          <div className="h-full w-full">
+            <MetabaseCard 
+              cardId={createdCardId}
+              height={windowHeight}
+              params={{}}
+            />
+          </div>
+        ) : (
+          <div className="h-full w-full flex items-center justify-center bg-gray-100">
+            <div className="text-center p-8 bg-white rounded shadow-md">
+              <p className="text-gray-800 mb-2 font-medium">No card has been created yet.</p>
+              <p className="text-gray-600">Click "Create New Card" to generate and embed a Metabase card</p>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

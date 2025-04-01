@@ -11,7 +11,7 @@ interface MetabaseCardProps {
 
 const MetabaseCard = ({ 
   cardId,
-  height = 400, 
+  height = 800, 
   params = {},
   createCard = false,
   cardPayload = undefined
@@ -19,7 +19,6 @@ const MetabaseCard = ({
   const [iframeUrl, setIframeUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  // We don't need actualCardId as a separate state variable as it causes infinite loops
   
   useEffect(() => {
     const setupCard = async () => {
@@ -63,7 +62,10 @@ const MetabaseCard = ({
           ...params
         }).toString();
         
-        const response = await fetch(`/api/metabase-card-token?${queryParams}`);
+        const tokenUrl = `/api/metabase-card-token?${queryParams}`;
+        console.log("Token URL:", tokenUrl);
+        
+        const response = await fetch(tokenUrl);
         
         if (!response.ok) {
           const errorData = await response.text();
@@ -79,7 +81,8 @@ const MetabaseCard = ({
           throw new Error('Metabase site URL not configured');
         }
         
-        const url = `${metabaseSiteUrl}/embed/question/${token}#bordered=true&titled=true`;
+        // Add parameters for full-screen and borderless display
+        const url = `${metabaseSiteUrl}/embed/question/${token}#bordered=false&titled=true&hide_parameters=true`;
         console.log("Setting iframe URL:", url);
         setIframeUrl(url);
         setError(null);
@@ -95,20 +98,38 @@ const MetabaseCard = ({
   }, [cardId, params, createCard, cardPayload]);
   
   if (loading) {
-    return <div>Loading card...</div>;
+    return (
+      <div className="flex items-center justify-center h-full w-full bg-white">
+        <div className="text-center">
+          <svg className="animate-spin h-10 w-10 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p className="text-gray-700">Loading visualization...</p>
+        </div>
+      </div>
+    );
   }
   
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="flex items-center justify-center h-full w-full">
+        <div className="p-6 text-red-500 border border-red-300 rounded bg-red-50 max-w-xl">
+          <h3 className="font-semibold text-lg mb-2">Error Loading Visualization</h3>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
   }
   
   return (
-    <div className="metabase-container">
+    <div className="h-full w-full bg-white">
       <iframe
         src={iframeUrl}
-        frameBorder="0"
+        style={{ border: 'none' }}
         width="100%"
-        height={height}
+        height={height || "100%"}
+        className="h-full w-full"
       ></iframe>
     </div>
   );
