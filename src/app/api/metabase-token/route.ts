@@ -4,14 +4,17 @@ import jwt from 'jsonwebtoken';
 export async function GET(request: NextRequest) {
   // Get URL parameters
   const { searchParams } = new URL(request.url);
-  const dashboardId = searchParams.get('dashboardId');
+  const cardId = searchParams.get('cardId');
   
-  if (!dashboardId) {
-    return NextResponse.json({ error: 'Dashboard ID is required' }, { status: 400 });
+  if (!cardId) {
+    return NextResponse.json({ error: 'Card ID is required' }, { status: 400 });
   }
-
+  
   // Get your secret key from environment variables
   const METABASE_SECRET_KEY = process.env.METABASE_SECRET_KEY;
+  
+  console.log("Generating token for card ID:", cardId);
+  console.log("Secret key available:", METABASE_SECRET_KEY ? 'Yes' : 'No');
   
   if (!METABASE_SECRET_KEY) {
     return NextResponse.json(
@@ -20,13 +23,13 @@ export async function GET(request: NextRequest) {
     );
   }
   
-  // Parameters for the dashboard
-  const resource = { dashboard: parseInt(dashboardId) };
+  // Parameters for the card
+  const resource = { question: parseInt(cardId) };
   
-  // Extract additional parameters to filter the dashboard
+  // Extract additional parameters to filter the card
   const params: Record<string, string> = {};
   searchParams.forEach((value, key) => {
-    if (key !== 'dashboardId') {
+    if (key !== 'cardId') {
       params[key] = value;
     }
   });
