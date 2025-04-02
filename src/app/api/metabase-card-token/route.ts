@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get URL parameters
     const { searchParams } = new URL(request.url);
     const cardId = searchParams.get('cardId');
     
@@ -13,7 +12,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Card ID is required' }, { status: 400 });
     }
     
-    // Get your secret key from environment variables
     const METABASE_SECRET_KEY = process.env.METABASE_SECRET_KEY;
     
     console.log("Secret key available:", METABASE_SECRET_KEY ? 'Yes' : 'No');
@@ -25,10 +23,8 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Parameters for the card
     const resource = { question: parseInt(cardId) };
     
-    // Extract additional parameters to filter the card
     const params: Record<string, string> = {};
     searchParams.forEach((value, key) => {
       if (key !== 'cardId') {
@@ -36,21 +32,18 @@ export async function GET(request: NextRequest) {
       }
     });
     
-    // Create the payload
     const payload = {
       resource,
       params,
-      exp: Math.round(Date.now() / 1000) + (10 * 60) // Token expires in 10 minutes
+      exp: Math.round(Date.now() / 1000) + (10 * 60)
     };
     
     console.log("Creating token with payload:", JSON.stringify(payload));
     
-    // Sign the token
     const token = jwt.sign(payload, METABASE_SECRET_KEY);
     
     console.log("Token created successfully");
     
-    // Return the token
     return NextResponse.json({ token });
   } catch (error) {
     console.error("Error in metabase-card-token API route:", error);

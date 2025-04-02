@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Metabase API credentials
     const METABASE_URL = process.env.METABASE_SITE_URL;
     const METABASE_USERNAME = process.env.METABASE_USERNAME;
     const METABASE_PASSWORD = process.env.METABASE_PASSWORD;
@@ -26,7 +25,6 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Step 1: Authenticate and get session token
     const sessionResponse = await fetch(`${METABASE_URL}/api/session`, {
       method: 'POST',
       headers: {
@@ -47,7 +45,6 @@ export async function POST(request: NextRequest) {
     
     const { id: sessionId } = await sessionResponse.json();
     
-    // Step 2: Create the card
     const cardResponse = await fetch(`${METABASE_URL}/api/card`, {
       method: 'POST',
       headers: {
@@ -68,9 +65,7 @@ export async function POST(request: NextRequest) {
     const cardData = await cardResponse.json();
     const cardId = cardData.id;
     
-    // Step 3: Enable embedding for the card if requested
     if (enableEmbedding) {
-      // First, check current embedding settings
       const cardSettingsResponse = await fetch(`${METABASE_URL}/api/card/${cardId}`, {
         method: 'GET',
         headers: {
@@ -85,7 +80,6 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      // Update the card to enable embedding
       const updateResponse = await fetch(`${METABASE_URL}/api/card/${cardId}`, {
         method: 'PUT',
         headers: {
@@ -94,7 +88,7 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           enable_embedding: true,
-          embedding_params: {} // Allow all parameters or specify which ones to enable
+          embedding_params: {}
         }),
       });
       

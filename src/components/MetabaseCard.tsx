@@ -2,11 +2,10 @@
 import { useState, useEffect } from 'react';
 
 interface MetabaseCardProps {
-  cardId?: number;           // Optional - existing card ID to display
-  height?: number;           // Height of the iframe
-  params?: Record<string, string>; // Optional parameters to filter the card
-  createCard?: boolean;      // Control whether to create a new card
-  cardPayload?: any;         // Card configuration payload
+  height?: number;           
+  params?: Record<string, string>; 
+  createCard?: boolean;
+  cardPayload?: any;
 }
 
 const MetabaseCard = ({ 
@@ -27,7 +26,6 @@ const MetabaseCard = ({
         
         let idToUse = cardId;
         
-        // Step 1: Create the card if needed
         if (createCard && cardPayload) {
           console.log("Creating new card...");
           const cardResponse = await fetch('/api/metabase-card', {
@@ -37,7 +35,7 @@ const MetabaseCard = ({
             },
             body: JSON.stringify({
               cardPayload: cardPayload,
-              enableEmbedding: true // Request to enable embedding for this card
+              enableEmbedding: true 
             }),
           });
           
@@ -51,7 +49,6 @@ const MetabaseCard = ({
           idToUse = cardData.id;
         }
         
-        // Step 2: Now that we have a card ID (either provided or created), fetch the signed token
         if (!idToUse) {
           throw new Error('No card ID available. Either provide a cardId or set createCard to true with a cardPayload.');
         }
@@ -75,13 +72,11 @@ const MetabaseCard = ({
         const { token } = await response.json();
         console.log("Token received for card");
         
-        // Create the iframe URL with the token
         const metabaseSiteUrl = process.env.NEXT_PUBLIC_METABASE_SITE_URL;
         if (!metabaseSiteUrl) {
           throw new Error('Metabase site URL not configured');
         }
         
-        // Add parameters for full-screen and borderless display
         const url = `${metabaseSiteUrl}/embed/question/${token}#bordered=false&titled=true&hide_parameters=true`;
         console.log("Setting iframe URL:", url);
         setIframeUrl(url);

@@ -6,25 +6,20 @@ export default function DashboardPage() {
   const [createdCardId, setCreatedCardId] = useState<number | null>(null);
   const [windowHeight, setWindowHeight] = useState<number>(800);
   
-  // Calculate available height for the card
   useEffect(() => {
     const calculateHeight = () => {
-      // Subtract header height and padding to get the available space
-      const headerHeight = 100; // Approximate height of your header
-      const padding = 32; // Total vertical padding (16px top + 16px bottom)
+      const headerHeight = 100;
+      const padding = 32;
       const availableHeight = window.innerHeight - headerHeight - padding;
       setWindowHeight(availableHeight > 400 ? availableHeight : 400);
     };
     
-    // Calculate on mount
     calculateHeight();
     
-    // Recalculate on window resize
     window.addEventListener('resize', calculateHeight);
     return () => window.removeEventListener('resize', calculateHeight);
   }, []);
   
-  // Example of a card payload you might want to use
   const [customCardPayload, setCustomCardPayload] = useState({
     name: "Orders by Category Stacked by Price Range",
     dataset_query: {
@@ -77,11 +72,10 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">
-      {/* Minimal header */}
       <header className="bg-white shadow-sm p-4">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-semibold text-black">Analytics Cards</h1>
+            <h1 className="text-xl font-semibold text-black">Sample Analytics Display</h1>
             {createdCardId && (
               <p className="text-gray-800 font-medium">
                 Created Card ID: <span className="font-mono">{createdCardId}</span>
@@ -99,7 +93,6 @@ export default function DashboardPage() {
         </div>
       </header>
       
-      {/* Main content - takes all available space */}
       <main className="flex-grow w-full overflow-hidden">
         {createdCardId ? (
           <div className="h-full w-full">
